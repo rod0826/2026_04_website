@@ -111,6 +111,7 @@
       100% { transform: translateX(-50%) translateY(16px); opacity: 0; }
     }
 
+    /* Section base */
     section {
       padding: 80px 20px;
       max-width: 1100px;
@@ -140,6 +141,7 @@
       max-width: 560px;
     }
 
+    /* Photo Grid */
     .photo-section {
       padding: 80px 20px;
       max-width: 1200px;
@@ -191,6 +193,7 @@
       opacity: 1;
     }
 
+    /* Feature row */
     .feature-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -201,8 +204,12 @@
       margin: 0 auto;
     }
 
-    .feature-row.reverse { direction: rtl; }
-    .feature-row.reverse > * { direction: ltr; }
+    .feature-row.reverse {
+      direction: rtl;
+    }
+    .feature-row.reverse > * {
+      direction: ltr;
+    }
 
     .feature-img {
       border-radius: 24px;
@@ -218,7 +225,11 @@
       transition: transform 0.6s ease;
     }
 
-    .feature-img:hover img { transform: scale(1.04); }
+    .feature-img:hover img {
+      transform: scale(1.04);
+    }
+
+    .feature-content {}
 
     .feature-content .tags {
       display: flex;
@@ -236,6 +247,7 @@
       font-size: 0.85rem;
     }
 
+    /* Stats */
     .stats-section {
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
@@ -256,7 +268,10 @@
       line-height: 1;
     }
 
-    .stat-item .unit { font-size: 1rem; color: #f5c55a; }
+    .stat-item .unit {
+      font-size: 1rem;
+      color: #f5c55a;
+    }
 
     .stat-item .label {
       margin-top: 8px;
@@ -264,6 +279,7 @@
       color: rgba(245,234,216,0.55);
     }
 
+    /* Cards */
     .cards-section {
       padding: 0 20px 80px;
       max-width: 1100px;
@@ -291,10 +307,24 @@
       transform: translateY(-4px);
     }
 
-    .card-icon { font-size: 2rem; margin-bottom: 14px; }
-    .card h3 { font-size: 1.1rem; color: #f5ead8; margin-bottom: 8px; }
-    .card p { font-size: 0.9rem; color: rgba(245,234,216,0.55); line-height: 1.7; }
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 14px;
+    }
 
+    .card h3 {
+      font-size: 1.1rem;
+      color: #f5ead8;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: rgba(245,234,216,0.55);
+      line-height: 1.7;
+    }
+
+    /* Footer */
     footer {
       border-top: 1px solid rgba(255,255,255,0.07);
       text-align: center;
@@ -303,7 +333,10 @@
       font-size: 0.85rem;
     }
 
-    footer a { color: rgba(245,197,90,0.6); text-decoration: none; }
+    footer a {
+      color: rgba(245,197,90,0.6);
+      text-decoration: none;
+    }
 
     @media (max-width: 768px) {
       .photo-grid {
@@ -311,20 +344,33 @@
         grid-template-rows: 200px 200px 200px;
       }
       .photo-grid .photo:first-child { grid-row: auto; }
+
       .feature-row, .feature-row.reverse {
         grid-template-columns: 1fr;
         direction: ltr;
         gap: 30px;
       }
-      .stats-section { grid-template-columns: repeat(2, 1fr); padding: 30px; }
-      .cards-grid { grid-template-columns: 1fr; }
+
+      .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 30px;
+      }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
 
+  <!-- Hero -->
   <div class="hero">
-    <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=1600&q=85&auto=format&fit=crop" alt="골든 리트리버" loading="eager"/>
+    <img
+      src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=1600&q=85&auto=format&fit=crop"
+      alt="골든 리트리버"
+      loading="eager"
+    />
     <div class="hero-overlay"></div>
     <div class="hero-text">
       <h1>Golden<br><span>Retriever</span></h1>
@@ -333,61 +379,138 @@
     <div class="scroll-hint">스크롤</div>
   </div>
 
+  <!-- Intro -->
   <section>
     <div class="section-label">About</div>
     <h2 class="section-title">황금빛 털과<br>따뜻한 눈빛</h2>
-    <p class="section-desc">골든 리트리버는 19세기 스코틀랜드에서 사냥개로 개량된 견종으로, 오늘날 전 세계에서 가장 사랑받는 반려견 중 하나입니다. 온화한 성격과 뛰어난 지능, 그리고 사람을 향한 무한한 애정으로 가족 모두의 마음을 사로잡아요.</p>
+    <p class="section-desc">
+      골든 리트리버는 19세기 스코틀랜드에서 사냥개로 개량된 견종으로, 오늘날 전 세계에서 가장 사랑받는 반려견 중 하나입니다. 온화한 성격과 뛰어난 지능, 그리고 사람을 향한 무한한 애정으로 가족 모두의 마음을 사로잡아요.
+    </p>
   </section>
 
+  <!-- Photo Grid -->
   <div class="photo-section">
     <div class="section-label">Gallery</div>
     <h2 class="section-title">일상의 순간들</h2>
     <div class="photo-grid">
-      <div class="photo"><img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=900&q=80&auto=format&fit=crop" alt="골든 리트리버 야외"/><div class="photo-caption">자연 속의 골든 리트리버</div></div>
-      <div class="photo"><img src="https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=600&q=80&auto=format&fit=crop" alt="골든 리트리버 강아지"/><div class="photo-caption">호기심 많은 퍼피</div></div>
-      <div class="photo"><img src="https://images.unsplash.com/photo-1516728778615-2d590ea1855e?w=600&q=80&auto=format&fit=crop" alt="골든 리트리버 미소"/><div class="photo-caption">행복한 미소</div></div>
-      <div class="photo"><img src="https://images.unsplash.com/photo-1574786527860-f2e274867c91?w=600&q=80&auto=format&fit=crop" alt="골든 리트리버 자연"/><div class="photo-caption">초원을 달리며</div></div>
-      <div class="photo"><img src="https://images.unsplash.com/photo-1538691705272-8fc11fcd59b2?w=600&q=80&auto=format&fit=crop" alt="골든 리트리버 클로즈업"/><div class="photo-caption">사랑스러운 눈빛</div></div>
+      <div class="photo">
+        <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=900&q=80&auto=format&fit=crop" alt="골든 리트리버 야외"/>
+        <div class="photo-caption">자연 속의 골든 리트리버</div>
+      </div>
+      <div class="photo">
+        <img src="https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=600&q=80&auto=format&fit=crop" alt="골든 리트리버 강아지"/>
+        <div class="photo-caption">호기심 많은 퍼피</div>
+      </div>
+      <div class="photo">
+        <img src="https://images.unsplash.com/photo-1516728778615-2d590ea1855e?w=600&q=80&auto=format&fit=crop" alt="골든 리트리버 미소"/>
+        <div class="photo-caption">행복한 미소</div>
+      </div>
+      <div class="photo">
+        <img src="https://images.unsplash.com/photo-1574786527860-f2e274867c91?w=600&q=80&auto=format&fit=crop" alt="골든 리트리버 자연"/>
+        <div class="photo-caption">초원을 달리며</div>
+      </div>
+      <div class="photo">
+        <img src="https://images.unsplash.com/photo-1538691705272-8fc11fcd59b2?w=600&q=80&auto=format&fit=crop" alt="골든 리트리버 클로즈업"/>
+        <div class="photo-caption">사랑스러운 눈빛</div>
+      </div>
     </div>
   </div>
 
+  <!-- Stats -->
   <div class="stats-section">
-    <div class="stat-item"><div class="number">25<span class="unit">~35</span></div><div class="label">체중 (kg)</div></div>
-    <div class="stat-item"><div class="number">10<span class="unit">~12</span></div><div class="label">평균 수명 (년)</div></div>
-    <div class="stat-item"><div class="number">4<span class="unit">위</span></div><div class="label">견종 지능 순위</div></div>
-    <div class="stat-item"><div class="number">2<span class="unit">h</span></div><div class="label">하루 권장 운동량</div></div>
+    <div class="stat-item">
+      <div class="number">25<span class="unit">~35</span></div>
+      <div class="label">체중 (kg)</div>
+    </div>
+    <div class="stat-item">
+      <div class="number">10<span class="unit">~12</span></div>
+      <div class="label">평균 수명 (년)</div>
+    </div>
+    <div class="stat-item">
+      <div class="number">4<span class="unit">위</span></div>
+      <div class="label">견종 지능 순위</div>
+    </div>
+    <div class="stat-item">
+      <div class="number">2<span class="unit">h</span></div>
+      <div class="label">하루 권장 운동량</div>
+    </div>
   </div>
 
+  <!-- Feature 1 -->
   <div class="feature-row">
-    <div class="feature-img"><img src="https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800&q=80&auto=format&fit=crop" alt="골든 리트리버 훈련"/></div>
+    <div class="feature-img">
+      <img src="https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800&q=80&auto=format&fit=crop" alt="골든 리트리버 훈련"/>
+    </div>
     <div class="feature-content">
       <div class="section-label">Intelligence</div>
       <h2 class="section-title">뛰어난<br>학습 능력</h2>
-      <p class="section-desc">골든 리트리버는 스탠리 코렌 박사의 견종 지능 연구에서 4위를 기록한 초총명 견종입니다.</p>
-      <div class="tags"><span class="tag">안내견</span><span class="tag">탐지견</span><span class="tag">치료견</span><span class="tag">구조견</span></div>
+      <p class="section-desc">
+        골든 리트리버는 스탠리 코렌 박사의 견종 지능 연구에서 4위를 기록한 초총명 견종입니다. 5번 이하의 반복 훈련으로 새로운 명령을 익히며, 95% 이상의 높은 복종률을 보여줍니다.
+      </p>
+      <div class="tags">
+        <span class="tag">안내견</span>
+        <span class="tag">탐지견</span>
+        <span class="tag">치료견</span>
+        <span class="tag">구조견</span>
+      </div>
     </div>
   </div>
 
+  <!-- Feature 2 -->
   <div class="feature-row reverse">
-    <div class="feature-img"><img src="https://images.unsplash.com/photo-1504594026032-821c718c4b2f?w=800&q=80&auto=format&fit=crop" alt="골든 리트리버 물놀이"/></div>
+    <div class="feature-img">
+      <img src="https://images.unsplash.com/photo-1504594026032-821c718c4b2f?w=800&q=80&auto=format&fit=crop" alt="골든 리트리버 물놀이"/>
+    </div>
     <div class="feature-content">
       <div class="section-label">Activity</div>
       <h2 class="section-title">물과 함께<br>신나는 하루</h2>
-      <p class="section-desc">리트리버는 태생적으로 물을 사랑합니다. 수영, 공 물어오기, 하이킹을 즐기는 활동적인 파트너예요.</p>
-      <div class="tags"><span class="tag">수영</span><span class="tag">공 놀이</span><span class="tag">하이킹</span><span class="tag">프리스비</span></div>
+      <p class="section-desc">
+        리트리버는 태생적으로 물을 사랑합니다. 방수 기능의 이중 모는 차가운 물에서도 체온을 유지해주며, 물갈퀴 모양의 발가락은 빠른 수영을 가능하게 합니다. 수영, 공 물어오기, 하이킹을 즐기는 활동적인 파트너예요.
+      </p>
+      <div class="tags">
+        <span class="tag">수영</span>
+        <span class="tag">공 놀이</span>
+        <span class="tag">하이킹</span>
+        <span class="tag">프리스비</span>
+      </div>
     </div>
   </div>
 
+  <!-- Cards -->
   <div class="cards-section">
     <div class="section-label">Care Guide</div>
     <h2 class="section-title">함께 사는 법</h2>
     <div class="cards-grid">
-      <div class="card"><div class="card-icon">🍖</div><h3>영양 관리</h3><p>체중 관리가 중요해요. 정해진 양을 하루 2회 나눠서 급여하세요.</p></div>
-      <div class="card"><div class="card-icon">✂️</div><h3>그루밍</h3><p>풍성한 이중모는 주 2~3회 빗질이 필요해요.</p></div>
-      <div class="card"><div class="card-icon">🏃</div><h3>운동</h3><p>하루 1~2시간 이상의 충분한 운동이 필요합니다.</p></div>
-      <div class="card"><div class="card-icon">🩺</div><h3>건강 체크</h3><p>정기적인 수의사 검진과 예방 접종을 잊지 마세요.</p></div>
-      <div class="card"><div class="card-icon">🧠</div><h3>사회화 훈련</h3><p>어린 시절부터 다양한 환경에 노출시켜 주세요.</p></div>
-      <div class="card"><div class="card-icon">💛</div><h3>정서 케어</h3><p>충분한 교감과 놀이 시간으로 정서를 채워주세요.</p></div>
+      <div class="card">
+        <div class="card-icon">🍖</div>
+        <h3>영양 관리</h3>
+        <p>체중 관리가 중요해요. 과식 경향이 있으므로 정해진 양을 하루 2회 나눠서 급여하고 간식은 적당히 조절하세요.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">✂️</div>
+        <h3>그루밍</h3>
+        <p>풍성한 이중모는 주 2~3회 빗질이 필요해요. 환절기에는 털 빠짐이 심해지므로 더 자주 관리해주세요.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏃</div>
+        <h3>운동</h3>
+        <p>하루 1~2시간 이상의 충분한 운동이 필요합니다. 운동 부족은 비만과 행동 문제로 이어질 수 있어요.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🩺</div>
+        <h3>건강 체크</h3>
+        <p>고관절 이형성증, 안구 질환에 취약한 편이에요. 정기적인 수의사 검진과 예방 접종을 잊지 마세요.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <h3>사회화 훈련</h3>
+        <p>어린 시절부터 다양한 사람, 동물, 환경에 노출시켜 주세요. 풍부한 사회화가 안정된 성격을 만듭니다.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💛</div>
+        <h3>정서 케어</h3>
+        <p>혼자 오랜 시간 방치되면 분리 불안이 생길 수 있어요. 충분한 교감과 놀이 시간으로 정서를 채워주세요.</p>
+      </div>
     </div>
   </div>
 
