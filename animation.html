@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>골든 리트리버 산책</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #87CEEB; overflow: hidden; height: 100vh; font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; cursor: none; user-select: none; }
+    .sky { position: fixed; inset: 0; background: linear-gradient(180deg, #4fa8d8 0%, #87CEEB 40%, #b8e4f5 64%, #c8efaa 68%, #8BC34A 73%, #5a9020 100%); }
+    .sun { position: fixed; top: 55px; right: 110px; width: 72px; height: 72px; background: radial-gradient(circle, #fffde0, #ffe040); border-radius: 50%; box-shadow: 0 0 50px 25px rgba(255,220,50,0.35); animation: sunPulse 4s ease-in-out infinite; }
+    @keyframes sunPulse { 0%,100% { box-shadow: 0 0 50px 25px rgba(255,220,50,0.35); } 50% { box-shadow: 0 0 70px 35px rgba(255,220,50,0.55); } }
+    .cloud { position: fixed; background: white; border-radius: 50px; opacity: 0.88; }
+    .cloud::before, .cloud::after { content:''; position: absolute; background: white; border-radius: 50%; }
+    .cloud1 { top:75px; width:130px; height:38px; animation: floatCloud 30s linear infinite; left:-160px; }
+    .cloud1::before { width:65px; height:58px; top:-32px; left:20px; }
+    .cloud1::after  { width:48px; height:48px; top:-24px; left:58px; }
+    .cloud2 { top:140px; width:95px; height:30px; animation: floatCloud 42s linear infinite; animation-delay:-15s; left:-130px; }
+    .cloud2::before { width:48px; height:44px; top:-26px; left:14px; }
+    .cloud2::after  { width:36px; height:36px; top:-18px; left:45px; }
+    .cloud3 { top:45px; width:105px; height:34px; animation: floatCloud 55s linear infinite; animation-delay:-35s; left:-140px; }
+    .cloud3::before { width:52px; height:50px; top:-28px; left:16px; }
+    .cloud3::after  { width:42px; height:40px; top:-22px; left:50px; }
+    @keyframes floatCloud { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 220px)); } }
+    .tree { position: fixed; bottom: 28vh; }
+    .tree-trunk { width:16px; background:#7a5230; border-radius:4px; margin:0 auto; }
+    .tree-top { border-radius: 50% 50% 40% 40%; }
+    .road { position: fixed; bottom:0; left:0; right:0; height:28vh; background: linear-gradient(180deg, #8a8a8a 0%, #a0a0a0 100%); }
+    .road::before { content:''; position:absolute; top:0; left:0; right:0; height:5px; background:rgba(255,255,255,0.12); }
+    .road-line { position:absolute; top:50%; left:0; right:0; height:4px; overflow:hidden; }
+    .road-line-inner { display:flex; gap:40px; animation: roadMove 1s linear infinite; }
+    .road-dash { display:inline-block; width:60px; height:4px; background:rgba(255,255,255,0.55); border-radius:2px; flex-shrink:0; }
+    @keyframes roadMove { from { transform: translateX(0); } to { transform: translateX(-100px); } }
+    .paw-container { position:fixed; bottom:28vh; left:0; right:0; height:64px; pointer-events:none; overflow:hidden; }
+    .paw { position:absolute; bottom:8px; font-size:18px; opacity:0; animation: pawAppear 1.2s ease forwards; }
+    @keyframes pawAppear { 0% { opacity:0; transform:scale(0.4) translateY(8px); } 35% { opacity:0.65; transform:scale(1) translateY(0); } 100% { opacity:0; } }
+    .dog-shadow { position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); width:90px; height:18px; background:rgba(0,0,0,0.25); border-radius:50%; filter:blur(4px); }
+    .dog-wrapper { position:fixed; bottom:28vh; left:0; }
+    .dog { width:150px; position:relative; bottom:0; transform-origin: bottom center; cursor: pointer; }
+    .dog img { width:100%; display:block; filter: drop-shadow(2px 6px 10px rgba(0,0,0,0.35)); }
+    .move-walk { animation: dogWalk 0.45s ease-in-out infinite alternate; }
+    @keyframes dogWalk { 0% { transform: translateY(0px) rotate(-1.5deg) scaleX(1); } 100% { transform: translateY(-10px) rotate(1.5deg) scaleX(1); } }
+    .move-run { animation: dogRun 0.22s ease-in-out infinite alternate; }
+    @keyframes dogRun { 0% { transform: translateY(0px) rotate(-3deg) scaleX(1.05); } 100% { transform: translateY(-16px) rotate(3deg) scaleX(0.95); } }
+    .move-sit { animation: dogSit 0.4s ease forwards; }
+    @keyframes dogSit { 0% { transform: translateY(0) scaleY(1) rotate(0); } 100% { transform: translateY(18px) scaleY(0.78) rotate(0); } }
+    .move-sniff { animation: dogSniff 0.6s ease-in-out infinite alternate; }
+    @keyframes dogSniff { 0% { transform: translateY(0) rotate(-8deg); } 100% { transform: translateY(8px) rotate(8deg); } }
+    .move-spin { animation: dogSpin 0.5s ease-in-out; }
+    @keyframes dogSpin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.15); } 100% { transform: rotate(360deg) scale(1); } }
+    .move-jump { animation: dogJump 0.7s ease forwards; }
+    @keyframes dogJump { 0% { transform: translateY(0) scale(1) rotate(0); } 35% { transform: translateY(-80px) scale(1.15) rotate(10deg); } 65% { transform: translateY(-45px) scale(1.07) rotate(-5deg); } 100% { transform: translateY(0) scale(1) rotate(0); } }
+    .move-roll { animation: dogRoll 0.8s ease forwards; }
+    @keyframes dogRoll { 0% { transform: translateY(0) rotate(0) scale(1); } 25% { transform: translateY(10px) rotate(90deg) scale(0.9); } 50% { transform: translateY(15px) rotate(180deg) scale(0.85); } 75% { transform: translateY(10px) rotate(270deg) scale(0.9); } 100% { transform: translateY(0) rotate(360deg) scale(1); } }
+    .move-shake { animation: dogShake 0.5s ease; }
+    @keyframes dogShake { 0%,100% { transform: rotate(0) scaleX(1); } 15% { transform: rotate(-8deg) scaleX(1.1); } 30% { transform: rotate(8deg) scaleX(0.9); } 45% { transform: rotate(-6deg) scaleX(1.05); } 60% { transform: rotate(6deg) scaleX(0.95); } 75% { transform: rotate(-3deg) scaleX(1.02); } }
+    .speech { position:absolute; bottom:158px; left:50%; transform:translateX(-50%); background:white; border-radius:18px; padding:9px 15px; font-size:0.82rem; font-weight:700; color:#4a3728; white-space:nowrap; box-shadow:0 4px 14px rgba(0,0,0,0.18); opacity:0; pointer-events:none; transition: opacity 0.25s; z-index: 10; }
+    .speech::after { content:''; position:absolute; bottom:-9px; left:50%; transform:translateX(-50%); border:9px solid transparent; border-top-color:white; border-bottom:none; }
+    .speech.show { opacity:1; }
+    .hud { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+    .score-box { background: rgba(255,255,255,0.92); border-radius: 50px; padding: 8px 28px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    .score-label { font-size: 0.78rem; font-weight: 600; color: #a07848; }
+    .score-value { font-size: 1.6rem; font-weight: 900; color: #e06020; min-width: 60px; text-align: center; transition: transform 0.15s; }
+    .score-value.pop { animation: scorePop 0.35s ease; }
+    @keyframes scorePop { 0% { transform: scale(1); } 50% { transform: scale(1.45); color: #ff4400; } 100% { transform: scale(1); } }
+    .level-bar-wrap { width: 180px; height: 8px; background: rgba(255,255,255,0.35); border-radius: 4px; overflow: hidden; }
+    .level-bar { height: 100%; background: linear-gradient(90deg, #f5c55a, #e06020); border-radius: 4px; transition: width 0.5s ease; }
+    .level-label { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.9); text-shadow: 0 1px 4px rgba(0,0,0,0.3); letter-spacing: 1px; }
+    .score-popup { position: fixed; font-size: 1.2rem; font-weight: 900; color: #ff6600; pointer-events: none; text-shadow: 0 2px 6px rgba(0,0,0,0.25); animation: scoreFloat 1.2s ease forwards; z-index: 50; }
+    @keyframes scoreFloat { 0% { transform: translateY(0) scale(0.6); opacity: 1; } 60% { transform: translateY(-50px) scale(1.2); opacity: 1; } 100% { transform: translateY(-90px) scale(1); opacity: 0; } }
+    .snack-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.92); border-radius: 50px; padding: 10px 18px; box-shadow: 0 6px 24px rgba(0,0,0,0.18); z-index: 20; }
+    .snack-label { font-size: 0.75rem; font-weight: 700; color: #a07848; margin-right: 4px; white-space: nowrap; }
+    .snack-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: 2px solid transparent; border-radius: 16px; padding: 7px 10px; cursor: pointer; transition: all 0.2s; position: relative; }
+    .snack-btn:hover { background: rgba(245,197,90,0.15); border-color: rgba(245,197,90,0.5); transform: translateY(-3px); }
+    .snack-btn:active { transform: scale(0.92); }
+    .snack-btn.selected { background: rgba(245,197,90,0.3); border-color: #e06020; transform: translateY(-4px); box-shadow: 0 4px 12px rgba(224,96,32,0.3); }
+    .snack-btn .icon { font-size: 1.5rem; line-height: 1; }
+    .snack-btn .name { font-size: 0.62rem; font-weight: 600; color: #7a5838; }
+    .snack-btn .pts  { font-size: 0.62rem; font-weight: 800; color: #e06020; }
+    .snack-btn .cooldown-ring { position: absolute; inset: 0; border-radius: 14px; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; font-weight: 700; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
+    .snack-btn.cooling .cooldown-ring { opacity: 1; }
+    .snack-btn.cooling { pointer-events: none; }
+    .speed-btns { position: fixed; top: 18px; right: 20px; display: flex; flex-direction: row; gap: 6px; z-index: 20; }
+    .spd-btn { background: rgba(255,255,255,0.85); border: none; border-radius: 24px; padding: 7px 13px; font-size: 0.78rem; font-weight: 600; color: #4a3728; cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.13); transition: transform 0.15s, background 0.15s; }
+    .spd-btn:hover { background: white; transform: translateY(-2px); }
+    .spd-btn.active { background: #f5c55a; }
+    @media (max-width: 600px) {
+      .speed-btns { top: auto; bottom: 86px; right: 50%; transform: translateX(50%); }
+      .spd-btn { padding: 6px 10px; font-size: 0.72rem; white-space: nowrap; }
+      .spd-btn .label-text { display: none; }
+      .snack-bar { padding: 7px 8px; gap: 4px; bottom: 12px; width: calc(100vw - 16px); justify-content: center; }
+      .snack-label { display: none; }
+      .snack-btn { padding: 5px 6px; }
+      .snack-btn .icon { font-size: 1.4rem; }
+      .snack-btn .name { font-size: 0.55rem; white-space: nowrap; }
+      .snack-btn .pts { font-size: 0.55rem; }
+      .score-box { padding: 6px 14px; gap: 8px; }
+      .score-label { font-size: 0.7rem; }
+      .score-value { font-size: 1.3rem; }
+      .mood { display: none; }
+    }
+    .heart { position:fixed; font-size:1.3rem; pointer-events:none; animation: heartFloat 1.2s ease forwards; z-index:20; }
+    @keyframes heartFloat { 0% { transform: translateY(0) scale(0.5); opacity:1; } 100% { transform: translateY(-90px) scale(1.3); opacity:0; } }
+    .thrown-snack { position: fixed; font-size: 1.5rem; pointer-events: none; z-index: 30; animation: throwArc var(--dur) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+    @keyframes throwArc { 0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; } 40% { transform: translate(var(--mx), var(--my)) rotate(180deg) scale(1.2); opacity: 1; } 100% { transform: translate(var(--ex), var(--ey)) rotate(360deg) scale(0.5); opacity: 0; } }
+    .custom-cursor { position:fixed; pointer-events:none; font-size:22px; transform:translate(-50%,-50%); z-index:9999; }
+    .mood { position: fixed; top: 18px; right: 20px; background: rgba(255,255,255,0.88); border-radius: 20px; padding: 8px 14px; font-size: 0.8rem; font-weight: 700; color: #4a3728; box-shadow: 0 3px 12px rgba(0,0,0,0.12); z-index: 20; transition: all 0.3s; }
+    .toast { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #f5c55a, #e06020); color: white; border-radius: 20px; padding: 10px 24px; font-size: 0.9rem; font-weight: 700; box-shadow: 0 6px 20px rgba(224,96,32,0.4); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .toast.show { opacity: 1; }
+    #tutorial { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px); transition: opacity 0.4s; }
+    #tutorial.hide { opacity: 0; pointer-events: none; }
+    .tutorial-box { background: white; border-radius: 28px; padding: 36px 40px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+    .tutorial-box .dog-thumb { width: 100px; height: 100px; object-fit: contain; margin-bottom: 12px; }
+    .tutorial-box h2 { font-size: 1.5rem; font-weight: 900; color: #4a3728; margin-bottom: 4px; }
+    .tutorial-box .subtitle { font-size: 0.82rem; color: #a07848; margin-bottom: 20px; }
+    .tutorial-steps { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .tutorial-steps li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.92rem; color: #4a3728; font-weight: 500; line-height: 1.5; word-break: keep-all; }
+    .step-num { width: 28px; height: 28px; min-width: 28px; flex-shrink: 0; background: linear-gradient(135deg, #f5c55a, #e06020); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; margin-top: 2px; }
+    .tutorial-start { width: 100%; background: linear-gradient(135deg, #f5c55a, #e06020); color: white; border: none; border-radius: 50px; padding: 14px; font-size: 1rem; font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(224,96,32,0.35); transition: transform 0.15s; }
+    .tutorial-start:hover { transform: translateY(-2px); }
+    .tutorial-start:active { transform: scale(0.97); }
+    .dog-nametag { position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.92); border-radius: 20px; padding: 3px 12px; font-size: 0.78rem; font-weight: 800; color: #b5681e; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    #levelup-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 150; pointer-events: none; opacity: 0; transition: opacity 0.4s; }
+    #levelup-overlay.show { opacity: 1; }
+    .levelup-box { background: linear-gradient(135deg, #fff9e6, #fff3cc); border: 3px solid #f5c55a; border-radius: 28px; padding: 32px 40px; text-align: center; box-shadow: 0 16px 48px rgba(224,96,32,0.3); animation: levelupPop 0.5s ease; }
+    @keyframes levelupPop { 0% { transform: scale(0.6); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    .levelup-box .lvl-icon { font-size: 3rem; margin-bottom: 8px; }
+    .levelup-box h2 { font-size: 1.6rem; font-weight: 900; color: #e06020; }
+    .levelup-box p { font-size: 0.9rem; color: #a07848; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div id="tutorial">
+    <div class="tutorial-box">
+      <img class="dog-thumb" src="dog_cutout.png" alt="써니"/>
+      <h2>안녕, 나는 써니야! 🐾</h2>
+      <div class="subtitle">김포에서 온 골든 리트리버</div>
+      <ul class="tutorial-steps">
+        <li><div class="step-num">1</div> 하단에서 <strong>간식을 선택</strong>해요</li>
+        <li><div class="step-num">2</div> 화면 속 <strong>써니를 클릭</strong>하면 간식을 줄 수 있어요</li>
+        <li><div class="step-num">3</div> 간식을 줄수록 <strong>점수가 올라가고</strong> 써니가 성장해요!</li>
+      </ul>
+      <button class="tutorial-start" onclick="startGame()">써니와 놀기 시작! 🎾</button>
+    </div>
+  </div>
+  <div id="levelup-overlay"><div class="levelup-box"><div class="lvl-icon" id="lvlIcon">🎉</div><h2 id="lvlTitle">레벨 업!</h2><p id="lvlDesc">써니가 성장했어요</p></div></div>
+  <div class="custom-cursor" id="cursor">🦴</div>
+  <div class="sky"></div><div class="sun"></div>
+  <div class="cloud cloud1"></div><div class="cloud cloud2"></div><div class="cloud cloud3"></div>
+  <div class="tree" style="left:6%"><div class="tree-top" style="width:64px;height:88px;margin-left:-24px;background:#3a8a2a"></div><div class="tree-trunk" style="height:44px"></div></div>
+  <div class="tree" style="left:20%"><div class="tree-top" style="width:52px;height:68px;margin-left:-18px;background:#4a9a3a"></div><div class="tree-trunk" style="height:32px"></div></div>
+  <div class="tree" style="left:58%"><div class="tree-top" style="width:72px;height:95px;margin-left:-28px;background:#2d7a20"></div><div class="tree-trunk" style="height:50px"></div></div>
+  <div class="tree" style="left:78%"><div class="tree-top" style="width:58px;height:74px;margin-left:-21px;background:#4a9a3a"></div><div class="tree-trunk" style="height:36px"></div></div>
+  <div class="tree" style="left:92%"><div class="tree-top" style="width:48px;height:62px;margin-left:-16px;background:#3a8a2a"></div><div class="tree-trunk" style="height:28px"></div></div>
+  <div class="road"><div class="road-line"><div class="road-line-inner" id="roadLine"></div></div></div>
+  <div class="paw-container" id="pawContainer"></div>
+  <div class="dog-wrapper" id="dogWrapper">
+    <div class="dog move-walk" id="dog">
+      <div class="dog-shadow"></div>
+      <img id="dogImg" src="dog_cutout.png" alt="써니"/>
+      <div class="speech" id="speech"></div>
+      <div class="dog-nametag">🐾 써니 (김포)</div>
+    </div>
+  </div>
+  <div class="hud">
+    <div class="score-box"><span class="score-label">🐾 간식 점수</span><span class="score-value" id="scoreVal">0</span><span class="score-label" id="levelLabel">Lv.1</span></div>
+    <div class="level-bar-wrap"><div class="level-bar" id="levelBar" style="width:0%"></div></div>
+    <div class="level-label" id="levelName">새내기 집사</div>
+  </div>
+  <div class="mood" id="mood">😐 보통</div>
+  <div class="toast" id="toast"></div>
+  <div class="snack-bar">
+    <span class="snack-label">간식 선택 👇</span>
+    <button class="snack-btn" data-snack="bone" data-pts="10" data-cd="1500" onclick="selectSnack(this)"><span class="icon">🦴</span><span class="name">뼈다귀</span><span class="pts">+10</span><div class="cooldown-ring"></div></button>
+    <button class="snack-btn" data-snack="chicken" data-pts="20" data-cd="2000" onclick="selectSnack(this)"><span class="icon">🍗</span><span class="name">치킨</span><span class="pts">+20</span><div class="cooldown-ring"></div></button>
+    <button class="snack-btn" data-snack="cookie" data-pts="15" data-cd="1800" onclick="selectSnack(this)"><span class="icon">🍪</span><span class="name">쿠키</span><span class="pts">+15</span><div class="cooldown-ring"></div></button>
+    <button class="snack-btn" data-snack="ball" data-pts="5" data-cd="800" onclick="selectSnack(this)"><span class="icon">🎾</span><span class="name">공</span><span class="pts">+5</span><div class="cooldown-ring"></div></button>
+    <button class="snack-btn" data-snack="steak" data-pts="50" data-cd="5000" onclick="selectSnack(this)"><span class="icon">🥩</span><span class="name">스테이크</span><span class="pts">+50</span><div class="cooldown-ring"></div></button>
+  </div>
+  <div class="speed-btns">
+    <button class="spd-btn" onclick="setSpeed(0.8, this)">🐢 <span class="label-text">천천히</span></button>
+    <button class="spd-btn active" onclick="setSpeed(1.8, this)">🚶 <span class="label-text">보통</span></button>
+    <button class="spd-btn" onclick="setSpeed(4.2, this)">🏃 <span class="label-text">빠르게</span></button>
+  </div>
+  <script>
+    function startGame() { const t = document.getElementById('tutorial'); t.classList.add('hide'); setTimeout(() => t.style.display = 'none', 400); }
+    const DOG_IMAGES = { 1: 'dog_cutout.png', 2: 'level2_cutout.png', 3: 'level3_cutout.png' };
+    let currentDogLevel = 1;
+    function getDogLevel(s) { if (s >= 300) return 3; if (s >= 150) return 2; return 1; }
+    function updateDogImage(newDogLevel, lvName) {
+      if (newDogLevel === currentDogLevel) return;
+      currentDogLevel = newDogLevel;
+      const img = document.getElementById('dogImg');
+      img.style.transition = 'opacity 0.4s'; img.style.opacity = '0';
+      setTimeout(() => { img.src = DOG_IMAGES[newDogLevel]; img.style.opacity = '1'; }, 400);
+      const overlay = document.getElementById('levelup-overlay');
+      const icons = { 2:'🐶', 3:'🌟' }; const descs = { 2:'더 씩씩해진 써니!', 3:'써니가 많이 컸어요! 🎊' };
+      document.getElementById('lvlIcon').textContent = icons[newDogLevel] || '🎉';
+      document.getElementById('lvlTitle').textContent = `Level ${newDogLevel} 달성!`;
+      document.getElementById('lvlDesc').textContent = descs[newDogLevel] || '써니가 성장했어요';
+      overlay.classList.add('show'); setTimeout(() => overlay.classList.remove('show'), 2800);
+    }
+    const roadLine = document.getElementById('roadLine');
+    for (let i = 0; i < 35; i++) { const d = document.createElement('div'); d.className = 'road-dash'; roadLine.appendChild(d); }
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
+    let x = -180, speed = 1.8, score = 0, lastPawX = -999, isBusy = false, speechTO = null, moodTimer = null, currentMove = 'walk';
+    const dog = document.getElementById('dog'), dogWrapper = document.getElementById('dogWrapper'), speech = document.getElementById('speech'), scoreVal = document.getElementById('scoreVal'), levelBar = document.getElementById('levelBar'), levelLabel = document.getElementById('levelLabel'), levelName = document.getElementById('levelName'), moodEl = document.getElementById('mood'), toast = document.getElementById('toast'), pawContainer = document.getElementById('pawContainer');
+    const LEVELS = [{ min:0, label:'Level 1', name:'Level 1' }, { min:150, label:'Level 2', name:'Level 2' }, { min:300, label:'Level 3', name:'Level 3' }];
+    function getLevel(s) { let lv = LEVELS[0]; for (const l of LEVELS) { if (s >= l.min) lv = l; } return lv; }
+    function getNextLevel(s) { for (let i = 0; i < LEVELS.length - 1; i++) { if (s < LEVELS[i+1].min) return LEVELS[i+1]; } return null; }
+    function updateHUD(added) {
+      scoreVal.textContent = score; scoreVal.classList.remove('pop'); void scoreVal.offsetWidth; scoreVal.classList.add('pop');
+      const lv = getLevel(score), next = getNextLevel(score);
+      levelLabel.textContent = lv.label; levelName.textContent = lv.name;
+      if (next) { const pct = ((score - lv.min) / (next.min - lv.min)) * 100; levelBar.style.width = Math.min(pct, 100) + '%'; if (score >= next.min && (score - added) < next.min) { showToast('🎉 ' + next.name + ' 달성! 써니가 성장했어요!'); } } else { levelBar.style.width = '100%'; }
+      const newDogLevel = getDogLevel(score); if (newDogLevel !== currentDogLevel) { updateDogImage(newDogLevel, lv.name); }
+    }
+    function showToast(msg) { toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
+    function spawnScorePopup(pts, dogX) { const el = document.createElement('div'); el.className = 'score-popup'; el.textContent = '+' + pts; el.style.left = (dogX + 20 + Math.random() * 40) + 'px'; el.style.top = (window.innerHeight * 0.72 - 60) + 'px'; document.body.appendChild(el); el.addEventListener('animationend', () => el.remove()); }
+    const MOODS = [{ min:0, emoji:'😐', text:'보통' }, { min:50, emoji:'😊', text:'기분 좋음' }, { min:150, emoji:'😄', text:'신남!' }, { min:300, emoji:'🤩', text:'최고야!!' }, { min:600, emoji:'🥰', text:'너무 행복해' }];
+    function updateMood() { let m = MOODS[0]; for (const mood of MOODS) { if (score >= mood.min) m = mood; } moodEl.textContent = m.emoji + ' ' + m.text; }
+    function spawnPaw(px) { const p = document.createElement('div'); p.className = 'paw'; p.textContent = '🐾'; p.style.left = px + 'px'; p.style.animationDuration = (0.9 + Math.random() * 0.4) + 's'; pawContainer.appendChild(p); p.addEventListener('animationend', () => p.remove()); }
+    function loop() { if (!isBusy || currentMove === 'run') { x += speed * (currentMove === 'run' ? 2.2 : 1); if (x > window.innerWidth + 20) x = -180; dogWrapper.style.transform = `translateX(${x}px)`; if (x - lastPawX > (currentMove === 'run' ? 38 : 55)) { spawnPaw(x + 35); lastPawX = x; } } requestAnimationFrame(loop); }
+    requestAnimationFrame(loop);
+    const SPEECHES = { bone:['뼈다귀다! 🦴', '최애 간식!', '냠냠!'], chicken:['치킨이다! 🍗', '이게 진짜지!', '행복해~'], cookie:['쿠키! 🍪', '달콤해!', '또 줘요!'], ball:['공이다! 🎾', '던져줘! 던져줘!', '물어올게요!'], steak:['스테이크?!!! 🥩', '최고의 집사!!!', '사랑해요!!! 💛'] };
+    function showSpeech(type) { const arr = SPEECHES[type]; const msg = arr[Math.floor(Math.random() * arr.length)]; speech.textContent = msg; speech.classList.add('show'); if (speechTO) clearTimeout(speechTO); speechTO = setTimeout(() => speech.classList.remove('show'), 2000); }
+    function throwSnack(emoji, targetX, targetY) { const el = document.createElement('div'); el.className = 'thrown-snack'; el.textContent = emoji; const startX = window.innerWidth * 0.5, startY = window.innerHeight - 80; el.style.left = startX + 'px'; el.style.top = startY + 'px'; const ex = targetX - startX, ey = targetY - startY, mx = ex * 0.5, my = Math.min(-120, ey * 0.4), dur = 0.55 + Math.random() * 0.2; el.style.setProperty('--ex', ex + 'px'); el.style.setProperty('--ey', ey + 'px'); el.style.setProperty('--mx', mx + 'px'); el.style.setProperty('--my', my + 'px'); el.style.setProperty('--dur', dur + 's'); document.body.appendChild(el); el.addEventListener('animationend', () => el.remove()); return dur * 1000; }
+    function spawnHearts(count = 5) { for (let i = 0; i < count; i++) { setTimeout(() => { const h = document.createElement('div'); h.className = 'heart'; const r = dog.getBoundingClientRect(); h.style.left = (r.left + Math.random() * r.width) + 'px'; h.style.top = (r.top + 20) + 'px'; h.textContent = ['❤️','🧡','💛','💕','🐾'][Math.floor(Math.random()*5)]; document.body.appendChild(h); h.addEventListener('animationend', () => h.remove()); }, i * 80); } }
+    function setMove(move, durationMs) { isBusy = (move !== 'walk' && move !== 'run'); currentMove = move; dog.className = 'dog move-' + move; if (durationMs) { setTimeout(() => { isBusy = false; currentMove = 'walk'; dog.className = 'dog move-walk'; }, durationMs); } }
+    function scheduleRandomMove() { const delay = 4000 + Math.random() * 6000; setTimeout(() => { if (!isBusy) { const moves = ['walk','walk','run','sniff','sit','spin','roll','shake']; const pick = moves[Math.floor(Math.random() * moves.length)]; const durations = { sit:2200, spin:700, roll:1000, shake:700, sniff:2000, run:2500 }; setMove(pick, durations[pick] || null); } scheduleRandomMove(); }, delay); }
+    scheduleRandomMove();
+    const SNACK_REACTIONS = { bone:{ move:'shake', dur:700, hearts:4 }, chicken:{ move:'spin', dur:700, hearts:6 }, cookie:{ move:'jump', dur:800, hearts:5 }, ball:{ move:'run', dur:2000, hearts:3 }, steak:{ move:'roll', dur:1000, hearts:8 } };
+    const SNACK_EMOJIS = { bone:'🦴', chicken:'🍗', cookie:'🍪', ball:'🎾', steak:'🥩' };
+    let selectedSnackBtn = null;
+    function selectSnack(btn) { if (selectedSnackBtn === btn) { btn.classList.remove('selected'); selectedSnackBtn = null; cursor.textContent = '🦴'; return; } document.querySelectorAll('.snack-btn').forEach(b => b.classList.remove('selected')); selectedSnackBtn = btn; btn.classList.add('selected'); cursor.textContent = SNACK_EMOJIS[btn.dataset.snack]; }
+    dog.addEventListener('click', () => {
+      if (selectedSnackBtn && !selectedSnackBtn.classList.contains('cooling')) {
+        const btn = selectedSnackBtn, type = btn.dataset.snack, pts = parseInt(btn.dataset.pts), cd = parseInt(btn.dataset.cd);
+        btn.classList.remove('selected'); selectedSnackBtn = null; cursor.textContent = '🦴';
+        btn.classList.add('cooling'); let remaining = Math.ceil(cd / 1000); const ring = btn.querySelector('.cooldown-ring'); ring.textContent = remaining + 's';
+        const cdInterval = setInterval(() => { remaining--; ring.textContent = remaining > 0 ? remaining + 's' : ''; if (remaining <= 0) { clearInterval(cdInterval); btn.classList.remove('cooling'); } }, 1000);
+        const dogRect = dog.getBoundingClientRect();
+        const throwDur = throwSnack(SNACK_EMOJIS[type], dogRect.left + dogRect.width / 2, dogRect.top + dogRect.height / 2);
+        setTimeout(() => { score += pts; updateHUD(pts); updateMood(); spawnScorePopup(pts, x); const rx = SNACK_REACTIONS[type]; setMove(rx.move, rx.dur); showSpeech(type); spawnHearts(rx.hearts); }, throwDur);
+      } else if (!isBusy) {
+        const spontaneous = ['sniff','sit','spin','jump','shake'], pick = spontaneous[Math.floor(Math.random() * spontaneous.length)];
+        const durations = { sit:2200, spin:700, jump:800, shake:700, sniff:2000 }; setMove(pick, durations[pick] || 1000);
+        const clickLines = ['간식은요? 👀','같이 놀자!','쓰다듬어줘!','배고파요~','간식 주세요! 🥺'];
+        speech.textContent = clickLines[Math.floor(Math.random() * clickLines.length)]; speech.classList.add('show'); if (speechTO) clearTimeout(speechTO); speechTO = setTimeout(() => speech.classList.remove('show'), 1800);
+      }
+    });
+    function setSpeed(s, btn) { speed = s; if (s >= 4) { currentMove = 'run'; dog.className = 'dog move-run'; } else { currentMove = 'walk'; dog.className = 'dog move-walk'; } document.querySelectorAll('.spd-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+  </script>
+</body>
+</html>
