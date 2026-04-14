@@ -524,6 +524,81 @@
     .levelup-box .lvl-icon { font-size: 3rem; margin-bottom: 8px; }
     .levelup-box h2 { font-size: 1.6rem; font-weight: 900; color: #e06020; }
     .levelup-box p  { font-size: 0.9rem; color: #a07848; margin-top: 6px; }
+
+    /* ── Hunger gauge ── */
+    .hunger-wrap {
+      width: 180px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+    }
+    .hunger-label {
+      font-size: 0.68rem; font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      letter-spacing: 1px;
+    }
+    .hunger-bar-wrap {
+      width: 180px; height: 8px;
+      background: rgba(255,255,255,0.35);
+      border-radius: 4px; overflow: hidden;
+    }
+    .hunger-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #ff8800, #ffcc00);
+      border-radius: 4px;
+      transition: width 0.5s ease, background 0.3s;
+      width: 100%;
+    }
+    .hunger-bar.critical {
+      background: linear-gradient(90deg, #ff2200, #ff6600);
+      animation: hungerPulse 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes hungerPulse {
+      0%   { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    /* ── Obstacle ── */
+    .obstacle {
+      position: fixed;
+      bottom: calc(28vh + 10px);
+      font-size: 2.2rem;
+      pointer-events: auto;
+      cursor: pointer;
+      z-index: 15;
+      animation: obstacleSlide var(--dur) linear forwards;
+      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+      user-select: none;
+    }
+    @keyframes obstacleSlide {
+      from { right: -80px; }
+      to   { right: 110vw; }
+    }
+    .obstacle-hit {
+      animation: obstacleHit 0.3s ease forwards !important;
+    }
+    @keyframes obstacleHit {
+      0%   { transform: scale(1); opacity: 1; }
+      50%  { transform: scale(1.5) rotate(30deg); opacity: 0.8; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    /* ── Combo display ── */
+    .combo-display {
+      font-size: 0.9rem; font-weight: 900;
+      color: #ff6600;
+      text-shadow: 0 2px 6px rgba(255,100,0,0.5);
+      min-height: 1.2rem;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+    .combo-display.active {
+      animation: comboPop 0.3s ease;
+    }
+    @keyframes comboPop {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -610,6 +685,13 @@
       <div class="level-bar" id="levelBar" style="width:0%"></div>
     </div>
     <div class="level-label" id="levelName">새내기 집사</div>
+    <div class="hunger-wrap">
+      <div class="hunger-label">🍖 허기</div>
+      <div class="hunger-bar-wrap">
+        <div class="hunger-bar" id="hungerBar"></div>
+      </div>
+    </div>
+    <div class="combo-display" id="comboDisplay"></div>
   </div>
 
   <!-- Mood -->
@@ -666,6 +748,8 @@
       const t = document.getElementById('tutorial');
       t.classList.add('hide');
       setTimeout(() => t.style.display = 'none', 400);
+      startHungerSystem();
+      scheduleObstacle();
     }
 
     // ── Dog images per level ──
@@ -728,6 +812,22 @@
     let speechTO   = null;
     let moodTimer  = null;
     let currentMove = 'walk';
+
+    // ── Hunger & Combo state ──
+    let hunger = 100;
+    let lastSnackTime = 0;
+    let comboCount = 0;
+    let comboTimer = null;
+    const COMBO_WINDOW = 5000;
+    const HUNGER_RECOVERY = { bone: 15, chicken: 30, cookie: 20, ball: 5, steak: 50 };
+
+    // ── Obstacle state ──
+    let obstacleTimeout = null;
+    const OBSTACLES = [
+      { emoji: '🐱', penalty: 15, label: '고양이' },
+      { emoji: '💧', penalty: 10, label: '웅덩이' },
+      { emoji: '🦴', penalty: 12, label: '뼈 장애물' },
+    ];
 
     const dog         = document.getElementById('dog');
     const dogWrapper  = document.getElementById('dogWrapper');
@@ -851,6 +951,8 @@
       cookie:  ['쿠키! 🍪', '달콤해!', '또 줘요!'],
       ball:    ['공이다! 🎾', '던져줘! 던져줘!', '물어올게요!'],
       steak:   ['스테이크?!!! 🥩', '최고의 집사!!!', '사랑해요!!! 💛'],
+      hunger:  ['배고파요... 😢', '간식 주세요!', '꼬르륵...'],
+      hurt:    ['아야! 😣', '으악!', '아파요 ㅠㅠ'],
     };
 
     function showSpeech(type) {
@@ -999,12 +1101,15 @@
           dogRect.top  + dogRect.height / 2
         );
 
-        // 반응 + 점수
+        // 반응 + 점수 (콤보 & 허기 적용)
         setTimeout(() => {
-          score += pts;
-          updateHUD(pts);
+          addCombo();
+          const finalPts = Math.round(pts * getComboMultiplier());
+          score += finalPts;
+          updateHUD(finalPts);
           updateMood();
-          spawnScorePopup(pts, x);
+          recoverHunger(type);
+          spawnScorePopup(finalPts, x);
           const rx = SNACK_REACTIONS[type];
           setMove(rx.move, rx.dur);
           showSpeech(type);
@@ -1024,6 +1129,133 @@
         speechTO = setTimeout(() => speech.classList.remove('show'), 1800);
       }
     });
+
+    // ── Hunger system ──
+    const hungerBarEl = document.getElementById('hungerBar');
+
+    function startHungerSystem() {
+      setInterval(() => {
+        hunger = Math.max(0, hunger - 1);
+        updateHungerUI();
+        if (hunger === 0) {
+          score = Math.max(0, score - 2);
+          updateHUD(0);
+          showSpeech('hunger');
+        }
+      }, 1000);
+    }
+
+    function updateHungerUI() {
+      hungerBarEl.style.width = hunger + '%';
+      if (hunger <= 20) {
+        hungerBarEl.classList.add('critical');
+      } else {
+        hungerBarEl.classList.remove('critical');
+      }
+    }
+
+    function recoverHunger(snackType) {
+      hunger = Math.min(100, hunger + (HUNGER_RECOVERY[snackType] || 10));
+      updateHungerUI();
+    }
+
+    // ── Obstacle system ──
+    function scheduleObstacle() {
+      const delay = 10000 + Math.random() * 15000;
+      obstacleTimeout = setTimeout(spawnObstacle, delay);
+    }
+
+    function spawnObstacle() {
+      const obs = OBSTACLES[Math.floor(Math.random() * OBSTACLES.length)];
+      const el = document.createElement('div');
+      el.className = 'obstacle';
+      el.textContent = obs.emoji;
+
+      const dur = 3.5 + Math.random() * 2;
+      el.style.setProperty('--dur', dur + 's');
+
+      document.body.appendChild(el);
+
+      el.addEventListener('click', () => {
+        el.classList.add('obstacle-hit');
+        el.style.animation = 'obstacleHit 0.3s ease forwards';
+        const bonus = 5;
+        score += bonus;
+        updateHUD(bonus);
+        spawnScorePopup(bonus, x);
+        showToast('💨 회피 성공! +' + bonus);
+        setMove('jump', 800);
+        setTimeout(() => el.remove(), 300);
+      });
+
+      const checkCollision = setInterval(() => {
+        if (!el.parentNode) { clearInterval(checkCollision); return; }
+        const obsRect = el.getBoundingClientRect();
+        const dogRect = document.getElementById('dog').getBoundingClientRect();
+
+        const overlap = !(obsRect.right < dogRect.left ||
+                          obsRect.left > dogRect.right ||
+                          obsRect.bottom < dogRect.top ||
+                          obsRect.top > dogRect.bottom);
+
+        if (overlap) {
+          clearInterval(checkCollision);
+          el.remove();
+          score = Math.max(0, score - obs.penalty);
+          updateHUD(0);
+          showToast('💥 ' + obs.label + '! -' + obs.penalty);
+          showSpeech('hurt');
+          setMove('shake', 600);
+        }
+      }, 100);
+
+      el.addEventListener('animationend', () => {
+        clearInterval(checkCollision);
+        if (el.parentNode) el.remove();
+      });
+
+      scheduleObstacle();
+    }
+
+    // ── Combo system ──
+    const comboDisplayEl = document.getElementById('comboDisplay');
+
+    function addCombo() {
+      const now = Date.now();
+      if (now - lastSnackTime < COMBO_WINDOW) {
+        comboCount++;
+      } else {
+        comboCount = 1;
+      }
+      lastSnackTime = now;
+
+      if (comboTimer) clearTimeout(comboTimer);
+      comboTimer = setTimeout(() => {
+        comboCount = 0;
+        comboDisplayEl.textContent = '';
+        comboDisplayEl.classList.remove('active');
+      }, COMBO_WINDOW);
+
+      updateComboUI();
+    }
+
+    function updateComboUI() {
+      if (comboCount >= 2) {
+        const multi = comboCount >= 3 ? '×2' : '×1.5';
+        comboDisplayEl.textContent = '🔥 COMBO ' + multi;
+        comboDisplayEl.classList.remove('active');
+        void comboDisplayEl.offsetWidth;
+        comboDisplayEl.classList.add('active');
+      } else {
+        comboDisplayEl.textContent = '';
+      }
+    }
+
+    function getComboMultiplier() {
+      if (comboCount >= 3) return 2.0;
+      if (comboCount >= 2) return 1.5;
+      return 1.0;
+    }
 
     // ── Speed ──
     function setSpeed(s, btn) {
