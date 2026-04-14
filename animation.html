@@ -263,6 +263,15 @@
       60%  { transform: translateY(-50px) scale(1.2); opacity: 1; }
       100% { transform: translateY(-90px) scale(1);   opacity: 0; }
     }
+    .miss-popup {
+      position: fixed;
+      font-size: 1.1rem; font-weight: 900;
+      color: #888;
+      pointer-events: none;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      animation: scoreFloat 1.1s ease forwards;
+      z-index: 50;
+    }
 
     /* === Snack bar === */
     .snack-bar {
@@ -316,6 +325,26 @@
     }
     .snack-btn.cooling .cooldown-ring { opacity: 1; }
     .snack-btn.cooling { pointer-events: none; }
+
+    .lock-overlay {
+      position: absolute; inset: 0;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+    .snack-btn.locked .lock-overlay { display: flex; }
+    .snack-btn.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .snack-btn.locked:hover {
+      background: none;
+      border-color: transparent;
+      transform: none;
+    }
 
     @media (max-width: 600px) {
       /* 간식바 */
@@ -730,23 +759,26 @@
   <!-- Snack bar -->
   <div class="snack-bar">
     <span class="snack-label">간식 선택 👇</span>
-    <button class="snack-btn" data-snack="chicken" data-pts="25"  data-cd="3000" onclick="selectSnack(this)">
+    <button class="snack-btn" data-snack="chicken" data-pts="25"  data-cd="3000" data-unlock-level="1" onclick="selectSnack(this)">
       <span class="icon">🍗</span>
       <span class="name">치킨</span>
       <span class="pts">+25</span>
       <div class="cooldown-ring"></div>
+      <div class="lock-overlay"></div>
     </button>
-    <button class="snack-btn" data-snack="cake"    data-pts="40"  data-cd="6000" data-ground="true" onclick="selectSnack(this)">
+    <button class="snack-btn" data-snack="cake"    data-pts="40"  data-cd="6000" data-ground="true" data-unlock-level="2" onclick="selectSnack(this)">
       <span class="icon">🎂</span>
       <span class="name">케이크</span>
       <span class="pts">+40</span>
       <div class="cooldown-ring"></div>
+      <div class="lock-overlay">🔒</div>
     </button>
-    <button class="snack-btn" data-snack="steak"   data-pts="60"  data-cd="10000" data-ground="true" onclick="selectSnack(this)">
+    <button class="snack-btn" data-snack="steak"   data-pts="60"  data-cd="10000" data-ground="true" data-unlock-level="3" onclick="selectSnack(this)">
       <span class="icon">🥩</span>
       <span class="name">스테이크</span>
       <span class="pts">+60</span>
       <div class="cooldown-ring"></div>
+      <div class="lock-overlay">🔒</div>
     </button>
   </div>
 
@@ -789,6 +821,7 @@
       const t = document.getElementById('tutorial');
       t.classList.add('hide');
       setTimeout(() => t.style.display = 'none', 400);
+      updateSnackAvailability();
       startHungerSystem();
       scheduleAutoJump();
       scheduleObstacle();
@@ -929,6 +962,7 @@
       if (newDogLevel !== currentDogLevel) {
         updateDogImage(newDogLevel, lv.name);
       }
+      updateSnackAvailability();
     }
 
     function showToast(msg) {
@@ -960,6 +994,24 @@
       let m = MOODS[0];
       for (const mood of MOODS) { if (score >= mood.min) m = mood; }
       moodEl.textContent = m.emoji + ' ' + m.text;
+    }
+
+    function updateSnackAvailability() {
+      const lv = getDogLevel(score);
+      document.querySelectorAll('.snack-btn[data-unlock-level]').forEach(btn => {
+        const required = parseInt(btn.dataset.unlockLevel);
+        if (lv >= required) {
+          btn.classList.remove('locked');
+        } else {
+          btn.classList.add('locked');
+          // 잠긴 버튼이 선택 중이었다면 해제
+          if (selectedSnackBtn === btn) {
+            btn.classList.remove('selected');
+            selectedSnackBtn = null;
+            cursor.textContent = '🦴';
+          }
+        }
+      });
     }
 
     // ── Paw prints ──
@@ -1007,6 +1059,7 @@
       steak:   ['스테이크?!!! 🥩', '최고의 집사!!!', '사랑해요!!! 💛'],
       hunger:  ['배고파요... 😢', '간식 주세요!', '꼬르륵...'],
       hurt:    ['아야! 😣', '으악!', '아파요 ㅠㅠ'],
+      miss:    ['놓쳤다! 😅', '아, 아쉬워!', '다시 줘요~'],
     };
 
     function showSpeech(type) {
@@ -1114,10 +1167,35 @@
     };
     const SNACK_EMOJIS = { chicken:'🍗', cake:'🎂', steak:'🥩' };
 
+    const FAIL_RATES = { chicken: 0.15, cake: 0.25, steak: 0.35 };
+
+    function getFailRate(snackType) {
+      let rate = FAIL_RATES[snackType] || 0.2;
+      if (dogY > 80) rate += 0.35;
+      else if (dogY > 40) rate += 0.2;
+      return rate;
+    }
+
+    function spawnMissPopup(dogX) {
+      const el = document.createElement('div');
+      el.className = 'miss-popup';
+      el.textContent = 'MISS! 💨';
+      el.style.left = (dogX + 20 + Math.random() * 40) + 'px';
+      el.style.top  = (window.innerHeight * 0.72 - 60) + 'px';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+
     // ── Selected snack state ──
     let selectedSnackBtn = null;
 
     function selectSnack(btn) {
+      // 잠금 체크
+      if (btn.classList.contains('locked')) {
+        const lv = btn.dataset.unlockLevel;
+        showToast(`🔒 Level ${lv} 달성 후 해금!`);
+        return;
+      }
       // 이미 선택된 버튼이면 선택 해제
       if (selectedSnackBtn === btn) {
         btn.classList.remove('selected');
@@ -1172,19 +1250,31 @@
           dogRect.top  + dogRect.height / 2
         );
 
-        // 반응 + 점수 (콤보 & 허기 적용)
+        // 반응 + 점수 (실패 판정 포함)
         setTimeout(() => {
-          addCombo();
-          const finalPts = Math.round(pts * getComboMultiplier());
-          score += finalPts;
-          updateHUD(finalPts);
-          updateMood();
-          recoverHunger(type);
-          spawnScorePopup(finalPts, x);
-          const rx = SNACK_REACTIONS[type];
-          setMove(rx.move, rx.dur);
-          showSpeech(type);
-          spawnHearts(rx.hearts);
+          const failed = Math.random() < getFailRate(type);
+          if (failed) {
+            // 실패
+            comboCount = 0;
+            comboDisplayEl.textContent = '';
+            comboDisplayEl.classList.remove('active');
+            setMove('shake', 600);
+            showSpeech('miss');
+            spawnMissPopup(x);
+          } else {
+            // 성공
+            addCombo();
+            const finalPts = Math.round(pts * getComboMultiplier());
+            score += finalPts;
+            updateHUD(finalPts);
+            updateMood();
+            recoverHunger(type);
+            spawnScorePopup(finalPts, x);
+            const rx = SNACK_REACTIONS[type];
+            setMove(rx.move, rx.dur);
+            showSpeech(type);
+            spawnHearts(rx.hearts);
+          }
         }, throwDur);
 
       } else if (!isBusy) {
