@@ -637,8 +637,9 @@
       <div class="subtitle">김포에서 온 골든 리트리버</div>
       <ul class="tutorial-steps">
         <li><div class="step-num">1</div> 하단에서 <strong>간식을 선택</strong>해요</li>
-        <li><div class="step-num">2</div> 화면 속 <strong>써니를 클릭</strong>하면 간식을 줄 수 있어요</li>
-        <li><div class="step-num">3</div> 간식을 줄수록 <strong>점수가 올라가고</strong> 써니가 성장해요!</li>
+        <li><div class="step-num">2</div> 써니가 <strong>땅에 내려올 때</strong> 클릭해서 간식을 줘요!</li>
+        <li><div class="step-num">3</div> 🎂케이크·🥩스테이크는 <strong>점프 중엔 못 줘요</strong> — 타이밍이 중요!</li>
+        <li><div class="step-num">4</div> 장애물을 클릭해서 <strong>써니를 지켜주세요</strong> 🚧</li>
       </ul>
       <button class="tutorial-start" onclick="startGame()">써니와 놀기 시작! 🎾</button>
     </div>
@@ -729,34 +730,22 @@
   <!-- Snack bar -->
   <div class="snack-bar">
     <span class="snack-label">간식 선택 👇</span>
-    <button class="snack-btn" data-snack="bone"    data-pts="10"  data-cd="1500" onclick="selectSnack(this)">
-      <span class="icon">🦴</span>
-      <span class="name">뼈다귀</span>
-      <span class="pts">+10</span>
-      <div class="cooldown-ring"></div>
-    </button>
-    <button class="snack-btn" data-snack="chicken" data-pts="20"  data-cd="2000" onclick="selectSnack(this)">
+    <button class="snack-btn" data-snack="chicken" data-pts="25"  data-cd="3000" onclick="selectSnack(this)">
       <span class="icon">🍗</span>
       <span class="name">치킨</span>
-      <span class="pts">+20</span>
+      <span class="pts">+25</span>
       <div class="cooldown-ring"></div>
     </button>
-    <button class="snack-btn" data-snack="cookie"  data-pts="15"  data-cd="1800" onclick="selectSnack(this)">
-      <span class="icon">🍪</span>
-      <span class="name">쿠키</span>
-      <span class="pts">+15</span>
+    <button class="snack-btn" data-snack="cake"    data-pts="40"  data-cd="6000" data-ground="true" onclick="selectSnack(this)">
+      <span class="icon">🎂</span>
+      <span class="name">케이크</span>
+      <span class="pts">+40</span>
       <div class="cooldown-ring"></div>
     </button>
-    <button class="snack-btn" data-snack="ball"    data-pts="5"   data-cd="800"  onclick="selectSnack(this)">
-      <span class="icon">🎾</span>
-      <span class="name">공</span>
-      <span class="pts">+5</span>
-      <div class="cooldown-ring"></div>
-    </button>
-    <button class="snack-btn" data-snack="steak"   data-pts="50"  data-cd="5000" onclick="selectSnack(this)">
+    <button class="snack-btn" data-snack="steak"   data-pts="60"  data-cd="10000" data-ground="true" onclick="selectSnack(this)">
       <span class="icon">🥩</span>
       <span class="name">스테이크</span>
-      <span class="pts">+50</span>
+      <span class="pts">+60</span>
       <div class="cooldown-ring"></div>
     </button>
   </div>
@@ -801,6 +790,7 @@
       t.classList.add('hide');
       setTimeout(() => t.style.display = 'none', 400);
       startHungerSystem();
+      scheduleAutoJump();
       scheduleObstacle();
     }
 
@@ -813,8 +803,8 @@
     let currentDogLevel = 1;
 
     function getDogLevel(s) {
-      if (s >= 300) return 3;
-      if (s >= 150) return 2;
+      if (s >= 1200) return 3;
+      if (s >= 500) return 2;
       return 1;
     }
 
@@ -858,13 +848,18 @@
     let moodTimer  = null;
     let currentMove = 'run';
 
+    let dogY = 0;       // 현재 Y 오프셋 (px, 양수=위)
+    let dogVY = 0;      // 수직 속도
+    let isAutoJumping = false;
+    const GRAVITY = 0.55;
+
     // ── Hunger & Combo state ──
     let hunger = 100;
     let lastSnackTime = 0;
     let comboCount = 0;
     let comboTimer = null;
     const COMBO_WINDOW = 5000;
-    const HUNGER_RECOVERY = { bone: 15, chicken: 30, cookie: 20, ball: 5, steak: 50 };
+    const HUNGER_RECOVERY = { chicken: 25, cake: 40, steak: 60 };
 
     // ── Obstacle state ──
     let obstacleTimeout = null;
@@ -891,8 +886,8 @@
     // ── Levels (3단계) ──
     const LEVELS = [
       { min:0,   label:'Level 1', name:'Level 1' },
-      { min:150, label:'Level 2', name:'Level 2' },
-      { min:300, label:'Level 3', name:'Level 3' },
+      { min:500, label:'Level 2', name:'Level 2' },
+      { min:1200, label:'Level 3', name:'Level 3' },
     ];
 
     function getLevel(s) {
@@ -983,7 +978,17 @@
       if (!isBusy || currentMove === 'run') {
         x += speed * (currentMove === 'run' ? 2.2 : 1);
         if (x > window.innerWidth + 20) x = -180;
-        dogWrapper.style.transform = `translateX(${x}px)`;
+        // Y 물리
+        if (isAutoJumping || dogVY !== 0 || dogY > 0) {
+          dogVY -= GRAVITY;
+          dogY += dogVY;
+          if (dogY <= 0) {
+            dogY = 0;
+            dogVY = 0;
+            isAutoJumping = false;
+          }
+        }
+        dogWrapper.style.transform = `translateX(${x}px) translateY(${-Math.max(0, dogY)}px)`;
         if (x - lastPawX > (currentMove === 'run' ? 38 : 55)) {
           spawnPaw(x + 35); lastPawX = x;
         }
@@ -996,6 +1001,7 @@
     const SPEECHES = {
       bone:    ['뼈다귀다! 🦴', '최애 간식!', '냠냠!'],
       chicken: ['치킨이다! 🍗', '이게 진짜지!', '행복해~'],
+      cake:    ['케이크다! 🎂', '달콤해요!', '이게 최고야!'],
       cookie:  ['쿠키! 🍪', '달콤해!', '또 줘요!'],
       ball:    ['공이다! 🎾', '던져줘! 던져줘!', '물어올게요!'],
       steak:   ['스테이크?!!! 🥩', '최고의 집사!!!', '사랑해요!!! 💛'],
@@ -1088,15 +1094,25 @@
     }
     scheduleRandomMove();
 
+    function scheduleAutoJump() {
+      const delay = 2200 + Math.random() * 3000;
+      setTimeout(() => {
+        if (!isAutoJumping && dogY === 0 && !isBusy) {
+          const force = 10 + Math.random() * 8; // 점프 높이 랜덤
+          dogVY = force;
+          isAutoJumping = true;
+        }
+        scheduleAutoJump();
+      }, delay);
+    }
+
     // ── Snack data ──
     const SNACK_REACTIONS = {
-      bone:    { move:'shake',  dur:700,  hearts:4 },
       chicken: { move:'spin',   dur:700,  hearts:6 },
-      cookie:  { move:'jump',   dur:800,  hearts:5 },
-      ball:    { move:'run',    dur:2000, hearts:3 },
-      steak:   { move:'roll',   dur:1000, hearts:8 },
+      cake:    { move:'jump',   dur:800,  hearts:7 },
+      steak:   { move:'roll',   dur:1000, hearts:10 },
     };
-    const SNACK_EMOJIS = { bone:'🦴', chicken:'🍗', cookie:'🍪', ball:'🎾', steak:'🥩' };
+    const SNACK_EMOJIS = { chicken:'🍗', cake:'🎂', steak:'🥩' };
 
     // ── Selected snack state ──
     let selectedSnackBtn = null;
@@ -1119,9 +1135,16 @@
     // ── Click dog → give selected snack ──
     dog.addEventListener('click', () => {
       if (selectedSnackBtn && !selectedSnackBtn.classList.contains('cooling')) {
-        // 간식 주기
         const btn  = selectedSnackBtn;
         const type = btn.dataset.snack;
+        // data-ground="true" 간식은 써니가 땅에 있을 때만 가능
+        if (btn.dataset.ground === 'true' && dogY > 40) {
+          speech.textContent = '점프 중엔 못 받아요! 🐾';
+          speech.classList.add('show');
+          if (speechTO) clearTimeout(speechTO);
+          speechTO = setTimeout(() => speech.classList.remove('show'), 1500);
+          return;
+        }
         const pts  = parseInt(btn.dataset.pts);
         const cd   = parseInt(btn.dataset.cd);
 
