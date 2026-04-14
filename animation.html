@@ -317,38 +317,7 @@
     .snack-btn.cooling .cooldown-ring { opacity: 1; }
     .snack-btn.cooling { pointer-events: none; }
 
-    /* Speed controls */
-    .speed-btns {
-      position: fixed; top: 18px; right: 20px;
-      display: flex; flex-direction: row; gap: 6px;
-      z-index: 20;
-    }
-    .spd-btn {
-      background: rgba(255,255,255,0.85);
-      border: none; border-radius: 24px;
-      padding: 7px 13px; font-size: 0.78rem; font-weight: 600;
-      color: #4a3728; cursor: pointer;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.13);
-      transition: transform 0.15s, background 0.15s;
-    }
-    .spd-btn:hover  { background: white; transform: translateY(-2px); }
-    .spd-btn.active { background: #f5c55a; }
-
     @media (max-width: 600px) {
-      /* 속도 버튼 - 아이콘만 표시, 간식바 위 */
-      .speed-btns {
-        top: auto;
-        bottom: 86px;
-        right: 50%;
-        transform: translateX(50%);
-      }
-      .spd-btn {
-        padding: 6px 10px;
-        font-size: 0.72rem;
-        white-space: nowrap;
-      }
-      .spd-btn .label-text { display: none; }
-
       /* 간식바 */
       .snack-bar {
         padding: 7px 8px;
@@ -497,6 +466,54 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
+    /* ── Video popup ── */
+    #video-popup {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    #video-popup.show {
+      opacity: 1; pointer-events: auto;
+    }
+    .video-popup-inner {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      max-width: 480px;
+      width: 90vw;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+    .video-popup-inner video {
+      width: 100%; display: block;
+      border-radius: 24px;
+    }
+    .video-popup-label {
+      position: absolute;
+      top: 14px; left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #f5c55a, #e06020);
+      color: white; border-radius: 50px;
+      padding: 7px 20px;
+      font-size: 0.9rem; font-weight: 900;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(224,96,32,0.4);
+      z-index: 1;
+    }
+    .video-close-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(0,0,0,0.55); color: white;
+      border: none; border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1;
+      transition: background 0.2s;
+    }
+    .video-close-btn:hover { background: rgba(0,0,0,0.8); }
+
     /* ── Level-up overlay ── */
     #levelup-overlay {
       position: fixed; inset: 0;
@@ -603,6 +620,15 @@
 </head>
 <body>
 
+  <!-- Video popup -->
+  <div id="video-popup">
+    <div class="video-popup-inner">
+      <div class="video-popup-label" id="videoLabel">🎉 레벨 업!</div>
+      <video id="popupVideo" playsinline webkit-playsinline muted></video>
+      <button class="video-close-btn" onclick="closeVideoPopup()">✕</button>
+    </div>
+  </div>
+
   <!-- Tutorial -->
   <div id="tutorial">
     <div class="tutorial-box">
@@ -666,7 +692,7 @@
 
   <!-- Dog -->
   <div class="dog-wrapper" id="dogWrapper">
-    <div class="dog move-walk" id="dog">
+    <div class="dog move-run" id="dog">
       <div class="dog-shadow"></div>
       <img id="dogImg" src="dog_cutout.png" alt="써니"/>
       <div class="speech" id="speech"></div>
@@ -735,14 +761,40 @@
     </button>
   </div>
 
-  <!-- Speed -->
-  <div class="speed-btns">
-    <button class="spd-btn" onclick="setSpeed(0.8,  this)">🐢 <span class="label-text">천천히</span></button>
-    <button class="spd-btn active" onclick="setSpeed(1.8, this)">🚶 <span class="label-text">보통</span></button>
-    <button class="spd-btn" onclick="setSpeed(4.2,  this)">🏃 <span class="label-text">빠르게</span></button>
-  </div>
-
   <script>
+    // ── Video popup ──
+    const VIDEO_SOURCES = {
+      2: 'video1.mp4',
+      3: 'video2.mp4',
+    };
+    const VIDEO_LABELS = {
+      2: '🐶 Level 2 달성! 써니가 성장했어요!',
+      3: '🌟 Level 3 달성! 최고의 써니!',
+    };
+    let videoPopupOpen = false;
+
+    function showVideoPopup(level) {
+      const popup = document.getElementById('video-popup');
+      const video = document.getElementById('popupVideo');
+      const label = document.getElementById('videoLabel');
+      label.textContent = VIDEO_LABELS[level] || '🎉 레벨 업!';
+      video.src = VIDEO_SOURCES[level];
+      video.load();
+      video.play().catch(() => {});
+      popup.classList.add('show');
+      videoPopupOpen = true;
+      video.addEventListener('ended', closeVideoPopup, { once: true });
+    }
+
+    function closeVideoPopup() {
+      const popup = document.getElementById('video-popup');
+      const video = document.getElementById('popupVideo');
+      video.pause();
+      video.src = '';
+      popup.classList.remove('show');
+      videoPopupOpen = false;
+    }
+
     // ── Tutorial ──
     function startGame() {
       const t = document.getElementById('tutorial');
@@ -779,15 +831,8 @@
         img.style.opacity = '1';
       }, 400);
 
-      // Level-up overlay
-      const overlay = document.getElementById('levelup-overlay');
-      const icons   = { 2:'🐶', 3:'🌟' };
-      const descs   = { 2:'더 씩씩해진 써니!', 3:'써니가 많이 컸어요! 🎊' };
-      document.getElementById('lvlIcon').textContent  = icons[newDogLevel] || '🎉';
-      document.getElementById('lvlTitle').textContent = `Level ${newDogLevel} 달성!`;
-      document.getElementById('lvlDesc').textContent  = descs[newDogLevel] || '써니가 성장했어요';
-      overlay.classList.add('show');
-      setTimeout(() => overlay.classList.remove('show'), 2800);
+      // Video popup 레벨업 영상
+      setTimeout(() => showVideoPopup(newDogLevel), 500);
     }
 
     // ── Road dashes ──
@@ -805,13 +850,13 @@
 
     // ── State ──
     let x          = -180;
-    let speed      = 1.8;
+    let speed      = 4.2;
     let score      = 0;
     let lastPawX   = -999;
     let isBusy     = false;   // dog is doing a special move
     let speechTO   = null;
     let moodTimer  = null;
-    let currentMove = 'walk';
+    let currentMove = 'run';
 
     // ── Hunger & Combo state ──
     let hunger = 100;
@@ -826,7 +871,10 @@
     const OBSTACLES = [
       { emoji: '🐱', penalty: 15, label: '고양이' },
       { emoji: '💧', penalty: 10, label: '웅덩이' },
-      { emoji: '🦴', penalty: 12, label: '뼈 장애물' },
+      { emoji: '🚲', penalty: 20, label: '자전거' },
+      { emoji: '🛹', penalty: 18, label: '스케이터' },
+      { emoji: '🚛', penalty: 25, label: '트럭' },
+      { emoji: '🌳', penalty: 12, label: '나무' },
     ];
 
     const dog         = document.getElementById('dog');
@@ -1161,7 +1209,11 @@
 
     // ── Obstacle system ──
     function scheduleObstacle() {
-      const delay = 10000 + Math.random() * 15000;
+      const dogLv = getDogLevel(score);
+      // 레벨이 올라갈수록 더 빠르게 등장
+      const base = dogLv === 3 ? 5000 : dogLv === 2 ? 7000 : 9000;
+      const rand = dogLv === 3 ? 5000 : dogLv === 2 ? 6000 : 8000;
+      const delay = base + Math.random() * rand;
       obstacleTimeout = setTimeout(spawnObstacle, delay);
     }
 
@@ -1171,7 +1223,9 @@
       el.className = 'obstacle';
       el.textContent = obs.emoji;
 
-      const dur = 3.5 + Math.random() * 2;
+      const dogLv = getDogLevel(score);
+      const baseSpeed = dogLv === 3 ? 1.8 : dogLv === 2 ? 2.5 : 3.2;
+      const dur = baseSpeed + Math.random() * 1.2;
       el.style.setProperty('--dur', dur + 's');
 
       document.body.appendChild(el);
@@ -1213,6 +1267,11 @@
         clearInterval(checkCollision);
         if (el.parentNode) el.remove();
       });
+
+      // Level 3에서는 연속 2개 장애물
+      if (getDogLevel(score) === 3 && Math.random() < 0.4) {
+        setTimeout(spawnObstacle, 1500 + Math.random() * 1000);
+      }
 
       scheduleObstacle();
     }
