@@ -818,12 +818,12 @@
       const video = document.getElementById('popupVideo');
       const label = document.getElementById('videoLabel');
       label.textContent = VIDEO_LABELS[level] || '🎉 레벨 업!';
+      video.muted = true;
       video.src = VIDEO_SOURCES[level];
-      video.load();
-      video.play().catch(() => {});
       popup.classList.add('show');
       videoPopupOpen = true;
       video.addEventListener('ended', closeVideoPopup, { once: true });
+      video.addEventListener('canplay', () => video.play().catch(() => {}), { once: true });
     }
 
     function closeVideoPopup() {
@@ -855,8 +855,8 @@
     let currentDogLevel = 1;
 
     function getDogLevel(s) {
-      if (s >= 500) return 3;
-      if (s >= 200) return 2;
+      if (s >= 200) return 3;
+      if (s >= 80)  return 2;
       return 1;
     }
 
@@ -938,8 +938,8 @@
     // ── Levels (3단계) ──
     const LEVELS = [
       { min:0,   label:'Level 1', name:'Level 1' },
-      { min:200, label:'Level 2', name:'Level 2' },
-      { min:500, label:'Level 3', name:'Level 3' },
+      { min:80,  label:'Level 2', name:'Level 2' },
+      { min:200, label:'Level 3', name:'Level 3' },
     ];
 
     function getLevel(s) {
