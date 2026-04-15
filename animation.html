@@ -672,7 +672,7 @@
   <div id="video-popup">
     <div class="video-popup-inner">
       <div class="video-popup-label" id="videoLabel">🎉 레벨 업!</div>
-      <video id="popupVideo" playsinline webkit-playsinline muted></video>
+      <video id="popupVideo" playsinline webkit-playsinline muted autoplay></video>
       <button class="video-close-btn" onclick="closeVideoPopup()">✕</button>
     </div>
   </div>
@@ -823,7 +823,10 @@
       popup.classList.add('show');
       videoPopupOpen = true;
       video.addEventListener('ended', closeVideoPopup, { once: true });
-      video.addEventListener('canplay', () => video.play().catch(() => {}), { once: true });
+      // play() 즉시 시도, 실패 시 canplaythrough 이후 재시도 (PC AbortError 대응)
+      video.play().catch(() => {
+        video.addEventListener('canplaythrough', () => video.play().catch(() => {}), { once: true });
+      });
     }
 
     function closeVideoPopup() {
